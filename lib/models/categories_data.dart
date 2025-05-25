@@ -31,4 +31,3 @@ final Map<String, Category> categoryMap = {
   ),
 };
 
-final List<Category> categories = categoryMap.values.toList();

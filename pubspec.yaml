@@ -36,11 +36,16 @@ dependencies:
   google_sign_in: ^6.2.1
   pigeon: ^11.0.0
   fl_chart: ^0.66.0
+  animated_custom_dropdown: ^3.1.1
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   uuid: ^4.5.1
   intl: ^0.20.2
+  flutter_svg: ^2.1.0
+  dots_indicator: ^4.0.1
+  google_fonts: ^6.2.1
+  animated_flip_counter: ^0.3.4
 
 dev_dependencies:
   flutter_test:
@@ -65,8 +70,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   # - assets/splash.png
+  assets:
+     - assets/
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
