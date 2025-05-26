@@ -20,11 +20,12 @@ class _LoginScreenState extends State<LoginScreen> {
   void _login() async {
     final user = await _authService.signInWithGoogle();
     if (user != null) {
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => BottomNavBarApp(),
         ),
+        (route) => false,
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,8 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
             Center(
               child: Image.asset(
                 AppImagePath.expense,
-                height: 200,
-                width: 200,
+                height: 400,
+                width: 400,
               ),
             ),
             ExpenseFlipper(),
