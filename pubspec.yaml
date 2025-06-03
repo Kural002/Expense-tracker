@@ -46,6 +46,7 @@ dependencies:
   dots_indicator: ^4.0.1
   google_fonts: ^6.2.1
   animated_flip_counter: ^0.3.4
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:

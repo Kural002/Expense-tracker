@@ -1,4 +1,3 @@
-
 import 'package:expense_tracker/screens/on_boarding_screen.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final _firestoreService = FirestoreService();
 
   final _authService = AuthService();
-
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +56,12 @@ class _HomeScreenState extends State<HomeScreen> {
       body: StreamBuilder<List<Expense>>(
         stream: _firestoreService.getExpenses(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+                child: Text('Something went wrong: ${snapshot.error}'));
+          }
           if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
           final expenses = snapshot.data!;
           return Column(
@@ -179,7 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-     
     );
   }
 }

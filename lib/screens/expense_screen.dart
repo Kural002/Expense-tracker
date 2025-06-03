@@ -13,6 +13,7 @@ class ExpenseScreen extends StatefulWidget {
 
 class _ExpenseScreenState extends State<ExpenseScreen> {
   DateTime selectedMonth = DateTime.now();
+  bool groupByMonth = false; // Toggle flag
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +32,21 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                groupByMonth = !groupByMonth;
+              });
+            },
+            icon: Icon(
+              groupByMonth
+                  ? Icons.calendar_view_day
+                  : Icons.calendar_view_month,
+              color: Colors.grey.shade800,
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -46,7 +62,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            Expanded(child: buildMonthlyExpensesScreen(selectedMonth)),
+            Expanded(child: buildGroupedExpensesScreen(selectedMonth)),
           ],
         ),
       ),
@@ -60,11 +76,9 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
             lastDate: DateTime.now(),
           );
           if (picked != null) {
-            setState(
-              () {
-                selectedMonth = DateTime(picked.year, picked.month);
-              },
-            );
+            setState(() {
+              selectedMonth = DateTime(picked.year, picked.month);
+            });
           }
         },
         icon: Icon(Icons.calendar_month, color: Colors.grey.shade800),
@@ -79,16 +93,20 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
     );
   }
 
-  Widget buildMonthlyExpensesScreen(DateTime selectedMonth) {
+  Widget buildGroupedExpensesScreen(DateTime selectedMonth) {
     return StreamBuilder<QuerySnapshot>(
       stream: getMonthlyExpenses(selectedMonth),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
+        if (snapshot.hasError) {
+          return Center(child: Text('Something went wrong: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
+        }
 
         final expenses = snapshot.data!.docs;
 
-        Map<String, List<QueryDocumentSnapshot>> groupedByDate = {};
+        Map<String, List<QueryDocumentSnapshot>> grouped = {};
 
         for (var doc in expenses) {
           final data = doc.data() as Map<String, dynamic>;
@@ -97,23 +115,38 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
 
           if (date.year == selectedMonth.year &&
               date.month == selectedMonth.month) {
-            final formatted = DateFormat('yyyy-MM-dd').format(date);
-            groupedByDate.putIfAbsent(formatted, () => []).add(doc);
+            String key;
+            if (groupByMonth) {
+              key = DateFormat('yyyy-MM').format(date); 
+            } else {
+              key = DateFormat('yyyy-MM-dd').format(date); // group by day
+            }
+            grouped.putIfAbsent(key, () => []).add(doc);
           }
         }
 
-        final sortedDates = groupedByDate.keys.toList()
-          ..sort((a, b) => b.compareTo(a)); // Newest day first
+        final sortedKeys = grouped.keys.toList()
+          ..sort((a, b) => b.compareTo(a)); // Newest first
 
-        if (sortedDates.isEmpty) {
+        if (sortedKeys.isEmpty) {
           return const Center(child: Text('No expenses found for this month.'));
         }
 
         return ListView.builder(
-          itemCount: sortedDates.length,
+          itemCount: sortedKeys.length,
           itemBuilder: (context, index) {
-            final date = sortedDates[index];
-            final dayExpenses = groupedByDate[date]!;
+            final key = sortedKeys[index];
+            final groupExpenses = grouped[key]!;
+
+            // Format heading based on grouping mode
+            final heading = groupByMonth
+                ? DateFormat('MMMM yyyy').format(DateTime.parse('$key-01'))
+                : DateFormat('EEEE, MMM d, yyyy').format(DateTime.parse(key));
+
+            final totalAmount = groupExpenses.fold<double>(0.0, (sum, doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              return sum + (data['amount'] as num).toDouble();
+            });
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,18 +158,14 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        DateFormat('EEEE, MMM d, yyyy')
-                            .format(DateTime.parse(date)),
+                        heading,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        '₹${dayExpenses.fold<double>(0.0, (sum, doc) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          return sum + (data['amount'] as num).toDouble();
-                        }).toStringAsFixed(2)}',
+                        '₹${totalAmount.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -146,7 +175,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                     ],
                   ),
                 ),
-                ...dayExpenses.map((doc) {
+                ...groupExpenses.map((doc) {
                   final data = doc.data() as Map<String, dynamic>;
                   return Container(
                     margin: const EdgeInsets.symmetric(vertical: 4),
