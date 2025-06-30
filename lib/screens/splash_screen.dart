@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'package:expense_tracker/screens/login_screen.dart';
 import 'package:expense_tracker/screens/on_boarding_screen.dart';
 import 'package:expense_tracker/utilities/app_Image_path.dart';
 import 'package:expense_tracker/widgets/bottom_nav_bar_app.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
