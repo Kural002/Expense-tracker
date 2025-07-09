@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:expense_tracker/screens/on_boarding_screen.dart';
+import 'package:expense_tracker/view/on_boarding_screen.dart';
 import 'package:expense_tracker/utilities/app_Image_path.dart';
 import 'package:expense_tracker/widgets/bottom_nav_bar_app.dart';
 import 'package:firebase_auth/firebase_auth.dart';

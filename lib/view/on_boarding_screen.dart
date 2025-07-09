@@ -1,4 +1,4 @@
-import 'package:expense_tracker/screens/login_screen.dart';
+import 'package:expense_tracker/view/login_screen.dart';
 import 'package:expense_tracker/utilities/app_Image_path.dart';
 import 'package:expense_tracker/utilities/app_colors.dart';
 import 'package:flutter/material.dart';

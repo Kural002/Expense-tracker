@@ -1,8 +1,8 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:expense_tracker/models/categories_data.dart';
 import 'package:expense_tracker/models/expense.dart';
-import 'package:expense_tracker/screens/expense_screen.dart';
-import 'package:expense_tracker/screens/home_screen.dart';
+import 'package:expense_tracker/view/expense_screen.dart';
+import 'package:expense_tracker/view/home_screen.dart';
 import 'package:expense_tracker/services/firestore_service.dart';
 import 'package:expense_tracker/widgets/custom_textfield/custom_textfield.dart';
 import 'package:flutter/material.dart';

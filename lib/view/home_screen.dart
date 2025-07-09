@@ -1,7 +1,9 @@
-import 'package:expense_tracker/screens/on_boarding_screen.dart';
+import 'package:expense_tracker/utilities/expense_provider.dart';
+import 'package:expense_tracker/view/on_boarding_screen.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../models/expense.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
@@ -21,6 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final expenses = context.watch<ExpenseProvider>().expenses;
+
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
@@ -43,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const OnBoardingScreen(),
+                    builder: (context) => OnBoardingScreen(),
                   ),
                 );
               },
@@ -132,37 +136,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                 icon:
                                     Icon(Icons.delete, color: Colors.red[800]),
                                 onPressed: () {
-                                  _firestoreService.deleteExpense(e.id);
+                                  context
+                                      .read<ExpenseProvider>()
+                                      .deleteExpense(e.id);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: const Text('Expense deleted'),
                                       action: SnackBarAction(
                                         label: 'Undo',
-                                        textColor: Colors.grey.shade50,
                                         onPressed: () {
-                                          _firestoreService.addExpense(
-                                            Expense(
-                                              id: e.id,
-                                              title: e.title,
-                                              amount: e.amount,
-                                              date: e.date,
-                                              category: e.category,
-                                            ),
-                                          );
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Expense restored',
-                                                style: TextStyle(
-                                                  color: Colors.grey.shade50,
-                                                ),
-                                              ),
-                                            ),
-                                          );
+                                          context
+                                              .read<ExpenseProvider>()
+                                              .addExpense(e);
                                         },
                                       ),
-                                      duration: const Duration(seconds: 2),
                                     ),
                                   );
                                 },
