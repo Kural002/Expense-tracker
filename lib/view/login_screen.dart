@@ -16,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _authService = AuthService();
+  
 
   void _login() async {
     final user = await _authService.signInWithGoogle();
@@ -36,7 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
+      
       backgroundColor: AppColor.kWhite,
       appBar: AppBar(
         backgroundColor: AppColor.kWhite,
@@ -74,9 +77,16 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 30.0),
-        child: GoogleButton(
-          onPressed: _login,
-        ),
+        child: MediaQuery.of(context).size.width < 600
+            ? GoogleButton(
+                onPressed: _login,
+              )
+            : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 750.0),
+              child: GoogleButton(
+                  onPressed: _login,
+                ),
+            )
       ),
     );
   }

@@ -13,7 +13,7 @@ class ExpenseScreen extends StatefulWidget {
 
 class _ExpenseScreenState extends State<ExpenseScreen> {
   DateTime selectedMonth = DateTime.now();
-  bool groupByMonth = false; // Toggle flag
+  bool groupByMonth = false; 
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -119,14 +119,14 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
             if (groupByMonth) {
               key = DateFormat('yyyy-MM').format(date); 
             } else {
-              key = DateFormat('yyyy-MM-dd').format(date); // group by day
+              key = DateFormat('yyyy-MM-dd').format(date); 
             }
             grouped.putIfAbsent(key, () => []).add(doc);
           }
         }
 
         final sortedKeys = grouped.keys.toList()
-          ..sort((a, b) => b.compareTo(a)); // Newest first
+          ..sort((a, b) => b.compareTo(a)); 
 
         if (sortedKeys.isEmpty) {
           return const Center(child: Text('No expenses found for this month.'));
@@ -138,7 +138,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
             final key = sortedKeys[index];
             final groupExpenses = grouped[key]!;
 
-            // Format heading based on grouping mode
+            
             final heading = groupByMonth
                 ? DateFormat('MMMM yyyy').format(DateTime.parse('$key-01'))
                 : DateFormat('EEEE, MMM d, yyyy').format(DateTime.parse(key));

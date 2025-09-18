@@ -21,128 +21,125 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.kOnBoardingColor,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          Container(
-            height: 10,
-            width: 10,
-            margin: const EdgeInsets.all(30),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColor.kGrayscaleDark100,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            flex: 5,
-            child: PageView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: onBoardinglist.length,
-                physics: const BouncingScrollPhysics(),
-                controller: _pageController1 ?? _pageController2,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  return OnBoardingCard(
-                    onBoardingModel: onBoardinglist[index],
-                  );
-                }),
-          ),
-          const SizedBox(height: 40),
-          Center(
-            child: DotsIndicator(
-              dotsCount: onBoardinglist.length,
-              position: _currentIndex.toDouble(),
-              decorator: DotsDecorator(
-                color: AppColor.kGrayscale40,
-                size: const Size.square(8.0),
-                activeSize: const Size(20.0, 8.0),
-                activeShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                activeColor: AppColor.kGrey3Color.withOpacity(0.4),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isWeb = constraints.maxWidth > 600;
+
+          return Center(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 600 : double.infinity,
               ),
-            ),
-          ),
-          const SizedBox(height: 37),
-          Expanded(
-            flex: 2,
-            child: PageView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: onBoardinglist.length,
-                physics: const BouncingScrollPhysics(),
-                controller: _pageController2 ?? _pageController1,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  return OnboardingTextCard(
-                    onBoardingModel: onBoardinglist[index],
-                  );
-                }),
-          ),
-          const SizedBox(height: 30),
-          Padding(
-            padding: const EdgeInsets.only(left: 25, right: 25, bottom: 40),
-            child: Center(
-              child: PrimaryButton(
-                elevation: 0,
-                onTap: () {
-                  if (_currentIndex == onBoardinglist.length - 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => LoginScreen(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  Container(
+                    height: 10,
+                    width: 10,
+                    margin: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColor.kGrayscaleDark100,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    flex: 5,
+                    child: PageView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: onBoardinglist.length,
+                      physics: const BouncingScrollPhysics(),
+                      controller: _pageController1,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        return OnBoardingCard(
+                          onBoardingModel: onBoardinglist[index],
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Center(
+                    child: DotsIndicator(
+                      dotsCount: onBoardinglist.length,
+                      position: _currentIndex.toDouble(),
+                      decorator: DotsDecorator(
+                        color: AppColor.kGrayscale40,
+                        size: const Size.square(8.0),
+                        activeSize: const Size(20.0, 8.0),
+                        activeShape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        activeColor: AppColor.kGrey3Color.withOpacity(0.4),
                       ),
-                    );
-                  } else if (_currentIndex == 0) {
-                    _pageController1.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                    _pageController2.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                  } else if (_currentIndex == 1) {
-                    _pageController1.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                    _pageController2.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                  } else {
-                    _pageController1.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                    _pageController2.nextPage(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.fastOutSlowIn,
-                    );
-                  }
-                },
-                text: _currentIndex == onBoardinglist.length - 1
-                    ? 'Get Started'
-                    : 'Next',
-                bgColor: AppColor.kGrayscale40,
-                borderRadius: 20,
-                height: 46,
-                width: 327,
-                textColor: AppColor.kWhite,
+                    ),
+                  ),
+                  const SizedBox(height: 37),
+                  Expanded(
+                    flex: 2,
+                    child: PageView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: onBoardinglist.length,
+                      physics: const BouncingScrollPhysics(),
+                      controller: _pageController2,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      },
+                      itemBuilder: (context, index) {
+                        return OnboardingTextCard(
+                          onBoardingModel: onBoardinglist[index],
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25, right: 25, bottom: 40),
+                    child: Center(
+                      child: PrimaryButton(
+                        elevation: 0,
+                        onTap: () {
+                          if (_currentIndex == onBoardinglist.length - 1) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => LoginScreen(),
+                              ),
+                            );
+                          } else {
+                            _pageController1.nextPage(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.fastOutSlowIn,
+                            );
+                            _pageController2.nextPage(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.fastOutSlowIn,
+                            );
+                          }
+                        },
+                        text: _currentIndex == onBoardinglist.length - 1
+                            ? 'Get Started'
+                            : 'Next',
+                        bgColor: AppColor.kGrayscale40,
+                        borderRadius: 20,
+                        height: 46,
+                        width: 327,
+                        textColor: AppColor.kWhite,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -180,6 +177,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
   late AnimationController _controller;
   final Duration _animationDuration = const Duration(milliseconds: 300);
   final Tween<double> _tween = Tween<double>(begin: 1.0, end: 0.95);
+
   @override
   void initState() {
     _controller = AnimationController(
@@ -217,7 +215,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
         child: Card(
           elevation: widget.elevation ?? 5,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(widget.borderRadius!),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 12),
           ),
           child: Container(
             height: widget.height ?? 55,
@@ -225,12 +223,12 @@ class _PrimaryButtonState extends State<PrimaryButton>
             width: widget.width ?? double.maxFinite,
             decoration: BoxDecoration(
               color: widget.bgColor,
-              borderRadius: BorderRadius.circular(widget.borderRadius!),
+              borderRadius: BorderRadius.circular(widget.borderRadius ?? 12),
             ),
             child: Text(
               widget.text,
               style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
+                      fontSize: widget.fontSize ?? 14,
                       fontWeight: FontWeight.w500,
                       color: AppColor.kWhite)
                   .copyWith(
@@ -245,25 +243,17 @@ class _PrimaryButtonState extends State<PrimaryButton>
   }
 }
 
-class OnBoardingCard extends StatefulWidget {
-  OnBoarding onBoardingModel;
-  OnBoardingCard({
-    super.key,
-    required this.onBoardingModel,
-  });
+class OnBoardingCard extends StatelessWidget {
+  final OnBoarding onBoardingModel;
+  const OnBoardingCard({super.key, required this.onBoardingModel});
 
-  @override
-  State<OnBoardingCard> createState() => _OnBoardingCardState();
-}
-
-class _OnBoardingCardState extends State<OnBoardingCard> {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      widget.onBoardingModel.image,
+      onBoardingModel.image,
       height: 300,
       width: double.maxFinite,
-      fit: BoxFit.fitWidth,
+      fit: BoxFit.contain,
     );
   }
 }
@@ -285,19 +275,17 @@ class OnboardingTextCard extends StatelessWidget {
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppColor.kGrayscaleDark100,
-            ).copyWith(fontSize: 24),
+            ),
           ),
-          const SizedBox(
-            height: 16,
-          ),
+          const SizedBox(height: 16),
           Text(
             onBoardingModel.description,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: AppColor.kWhite)
-                .copyWith(color: AppColor.kGrayscale40, fontSize: 14),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColor.kGrayscale40,
+            ),
           ),
         ],
       ),
