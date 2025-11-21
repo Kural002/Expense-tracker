@@ -68,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
           final expenses = snapshot.data!;
 
-
           final today = DateTime.now();
           final todayExpenses = expenses.where((e) {
             return e.date.year == today.year &&
@@ -82,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
               if (isWideScreen) {
                 return Row(
-
                   children: [
                     Expanded(
                       flex: 2,
@@ -106,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 );
               } else {
-
                 return Column(
                   children: [
                     SizedBox(
@@ -147,75 +144,84 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: expenses.length,
       itemBuilder: (_, i) {
         final e = expenses[i];
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    e.category.label.toUpperCase(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontFamily: GoogleFonts.poppins().fontFamily,
-                      fontSize: 12,
-                    ),
-                  ),
-                  Text(
-                    DateFormat('yyyy-MM-dd').format(e.date),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: GoogleFonts.poppins().fontFamily,
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                e.title.toUpperCase(),
-                style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  fontSize: 15,
+        return Dismissible(
+          key: Key(e.id),
+          direction: DismissDirection.endToStart,
+          onDismissed: (direction) {
+            final deletedExpense = e;
+
+            _firestoreService.deleteExpense(deletedExpense.id);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text("Expense deleted"),
+                action: SnackBarAction(
+                  label: "UNDO",
+                  textColor: Colors.white,
+                  onPressed: () {
+                    _firestoreService.addExpense(deletedExpense);
+                  },
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    "₹${e.amount.toStringAsFixed(2)}",
-                    style: TextStyle(
-                      fontFamily: GoogleFonts.roboto().fontFamily,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+            );
+          },
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.red.shade700,
+            ),
+            child: const Icon(Icons.delete, color: Colors.white),
+          ),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              spacing: 2,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  e.category.label.toUpperCase(),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: GoogleFonts.poppins().fontFamily,
+                    fontSize: 12,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      e.title.toUpperCase(),
+                      style: TextStyle(
+                        fontFamily: GoogleFonts.poppins().fontFamily,
+                        fontSize: 15,
+                      ),
                     ),
+                    Text(
+                      DateFormat('yyyy-MM-dd').format(e.date),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: GoogleFonts.poppins().fontFamily,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  "₹${e.amount.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    fontFamily: GoogleFonts.roboto().fontFamily,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                  IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red[800]),
-                    onPressed: () {
-                      context.read<ExpenseProvider>().deleteExpense(e.id);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Expense deleted'),
-                          action: SnackBarAction(
-                            label: 'Undo',
-                            onPressed: () {
-                              context.read<ExpenseProvider>().addExpense(e);
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         );
       },

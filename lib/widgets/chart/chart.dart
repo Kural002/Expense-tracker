@@ -14,18 +14,18 @@ class Chart extends StatelessWidget {
       'transportation': 0,
       'entertainment': 0,
       'utilities': 0,
+      'friends': 0,
       'others': 0,
     };
 
-  for (final expense in expenses) {
-  final category = expense.category.label;
-  if (bucketMap.containsKey(category)) {
-    bucketMap[category] = bucketMap[category]! + expense.amount;
-  } else {
-    bucketMap['others'] = bucketMap['others']! + expense.amount;
-  }
-}
-
+    for (final expense in expenses) {
+      final category = expense.category.label;
+      if (bucketMap.containsKey(category)) {
+        bucketMap[category] = bucketMap[category]! + expense.amount;
+      } else {
+        bucketMap['others'] = bucketMap['others']! + expense.amount;
+      }
+    }
 
     return bucketMap;
   }
@@ -41,6 +41,7 @@ class Chart extends StatelessWidget {
     'transportation': Icons.directions_car,
     'entertainment': Icons.movie,
     'utilities': Icons.lightbulb,
+    'friends': Icons.group,
     'others': Icons.more_horiz,
   };
 

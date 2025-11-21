@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'categories_data.dart' as custom;
 
 class Expense {
@@ -33,7 +31,8 @@ class Expense {
       title: data['title'],
       amount: (data['amount'] as num).toDouble(),
       date: DateTime.parse(data['date']),
-      category: custom.categoryMap[data['category']] ?? custom.categoryMap['others']!,
+      category:
+          custom.categoryMap[data['category']] ?? custom.categoryMap['others']!,
     );
   }
 }

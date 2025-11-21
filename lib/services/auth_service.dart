@@ -9,12 +9,10 @@ class AuthService {
   Future<User?> signInWithGoogle() async {
     try {
       if (kIsWeb) {
-        // 🔹 Web login
         GoogleAuthProvider googleProvider = GoogleAuthProvider();
         final userCredential = await _auth.signInWithPopup(googleProvider);
         return userCredential.user;
       } else {
-        // 🔹 Mobile login
         final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
         if (googleUser == null) return null;
 
