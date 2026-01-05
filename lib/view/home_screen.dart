@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontFamily: GoogleFonts.poppins().fontFamily,
-                    fontSize: 12,
+                    fontSize: 11,
                   ),
                 ),
                 Row(
