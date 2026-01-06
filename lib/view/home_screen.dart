@@ -106,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
               } else {
                 return Column(
                   children: [
+                    _buildTodayHeader(),
                     SizedBox(
                       height: 200,
                       child: Chart(expenses: todayExpenses),
@@ -227,4 +228,51 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+}
+
+Widget _buildTodayHeader() {
+  final now = DateTime.now();
+
+  final dayName = DateFormat('EEEE').format(now);
+  final dateText = DateFormat('dd MMM yyyy').format(now);
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Today",
+              style: TextStyle(
+                fontSize: 12,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              dayName,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: GoogleFonts.poppins().fontFamily,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+        Text(
+          dateText,
+          style: TextStyle(
+            fontSize: 14,
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            color: Colors.grey.shade800,
+          ),
+        ),
+      ],
+    ),
+  );
 }
