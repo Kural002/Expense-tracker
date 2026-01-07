@@ -1,13 +1,17 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:expense_tracker/models/categories_data.dart';
 import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/models/payment_type.dart';
+import 'package:expense_tracker/utilities/expense_provider.dart';
 import 'package:expense_tracker/view/expense_screen.dart';
 import 'package:expense_tracker/view/home_screen.dart';
 import 'package:expense_tracker/services/firestore_service.dart';
 import 'package:expense_tracker/widgets/custom_textfield/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter/cupertino.dart';
 
 class BottomNavBarApp extends StatefulWidget {
   @override
@@ -37,6 +41,7 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
 
     DateTime? selectedDate;
     Category selectedCategory = categoryMap['others']!;
+    PaymentType selectedPayment = PaymentType.upi;
 
     showModalBottomSheet(
       context: context,
@@ -98,11 +103,9 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                     ),
                     const SizedBox(height: 12),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(color: Colors.grey),
                       ),
                       child: CustomDropdown<String>(
                         items: categoryMap.values
@@ -136,6 +139,30 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                         }
                       },
                     ),
+                    const SizedBox(height: 12),
+                    Consumer<ExpenseProvider>(
+                      builder: (context, provider, _) {
+                        return CupertinoSlidingSegmentedControl<PaymentType>(
+                          groupValue: provider.paymentType,
+                          padding: const EdgeInsets.all(4),
+                          children: const {
+                            PaymentType.cash: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text('Cash'),
+                            ),
+                            PaymentType.upi: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text('UPI'),
+                            ),
+                          },
+                          onValueChanged: (value) {
+                            if (value != null) {
+                              provider.setPaymentType(value);
+                            }
+                          },
+                        );
+                      },
+                    ),
                     const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
@@ -155,13 +182,13 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                             );
                             return;
                           }
-
                           final expense = Expense(
                             id: const Uuid().v4(),
                             title: titleController.text.trim(),
                             amount: amount,
                             date: selectedDate ?? DateTime.now(),
                             category: selectedCategory,
+                            paymentType: selectedPayment,
                           );
 
                           _firestoreService.addExpense(expense);

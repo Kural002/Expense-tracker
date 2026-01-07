@@ -1,3 +1,5 @@
+import 'package:expense_tracker/models/payment_type.dart';
+
 import 'categories_data.dart' as custom;
 
 class Expense {
@@ -5,12 +7,14 @@ class Expense {
   final String title;
   final double amount;
   final DateTime date;
+  final PaymentType paymentType;
   final custom.Category category;
 
   Expense({
     required this.id,
     required this.title,
     required this.amount,
+    required this.paymentType,
     DateTime? date,
     required this.category,
   }) : date = date ?? DateTime.now();
@@ -22,6 +26,7 @@ class Expense {
       'amount': amount,
       'date': date.toIso8601String(),
       'category': category.label,
+      'paymentType': paymentType.name,
     };
   }
 
@@ -33,6 +38,8 @@ class Expense {
       date: DateTime.parse(data['date']),
       category:
           custom.categoryMap[data['category']] ?? custom.categoryMap['others']!,
+      paymentType:
+          data['paymentType'] == 'upi' ? PaymentType.upi : PaymentType.cash,
     );
   }
 }

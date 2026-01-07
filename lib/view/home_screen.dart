@@ -1,9 +1,9 @@
-import 'package:expense_tracker/utilities/expense_provider.dart';
+import 'package:expense_tracker/models/payment_type.dart';
 import 'package:expense_tracker/view/on_boarding_screen.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import '../models/expense.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
@@ -176,54 +176,71 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Icon(Icons.delete, color: Colors.white),
           ),
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              spacing: 2,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  e.category.label.toUpperCase(),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontFamily: GoogleFonts.poppins().fontFamily,
-                    fontSize: 11,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      e.title.toUpperCase(),
-                      style: TextStyle(
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                        fontSize: 15,
-                      ),
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    Text(
-                      DateFormat('yyyy-MM-dd').format(e.date),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                      ),
+                    child: Icon(
+                      e.category.icon,
+                      size: 20,
+                      color: Colors.grey.shade800,
                     ),
-                  ],
-                ),
-                Text(
-                  "₹${e.amount.toStringAsFixed(2)}",
-                  style: TextStyle(
-                    fontFamily: GoogleFonts.roboto().fontFamily,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
-              ],
-            ),
-          ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          e.title,
+                          style: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          DateFormat('dd MMM yyyy').format(e.date),
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "₹${e.amount.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 70,
+                    child: Center(
+                      child: e.paymentType == PaymentType.upi
+                          ? Icon(
+                              FontAwesomeIcons.coins,
+                              size: 18,
+                              color: Colors.grey,
+                            )
+                          : Icon(
+                              FontAwesomeIcons.googlePay,
+                              size: 18,
+                              color: Colors.grey,
+                            ),
+                    ),
+                  ),
+                ],
+              )),
         );
       },
     );
