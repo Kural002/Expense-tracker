@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expense_tracker/services/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,7 +14,8 @@ class ExpenseScreen extends StatefulWidget {
 
 class _ExpenseScreenState extends State<ExpenseScreen> {
   DateTime selectedMonth = DateTime.now();
-  bool groupByMonth = false; 
+  bool groupByMonth = false;
+  final _firestoreService = FirestoreService();
 
   @override
   Widget build(BuildContext context) {
@@ -117,16 +119,16 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
               date.month == selectedMonth.month) {
             String key;
             if (groupByMonth) {
-              key = DateFormat('yyyy-MM').format(date); 
+              key = DateFormat('yyyy-MM').format(date);
             } else {
-              key = DateFormat('yyyy-MM-dd').format(date); 
+              key = DateFormat('yyyy-MM-dd').format(date);
             }
             grouped.putIfAbsent(key, () => []).add(doc);
           }
         }
 
         final sortedKeys = grouped.keys.toList()
-          ..sort((a, b) => b.compareTo(a)); 
+          ..sort((a, b) => b.compareTo(a));
 
         if (sortedKeys.isEmpty) {
           return const Center(child: Text('No expenses found for this month.'));
@@ -138,7 +140,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
             final key = sortedKeys[index];
             final groupExpenses = grouped[key]!;
 
-            
             final heading = groupByMonth
                 ? DateFormat('MMMM yyyy').format(DateTime.parse('$key-01'))
                 : DateFormat('EEEE, MMM d, yyyy').format(DateTime.parse(key));
@@ -177,28 +178,58 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                 ),
                 ...groupExpenses.map((doc) {
                   final data = doc.data() as Map<String, dynamic>;
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: ListTile(
-                      title: Text(data['title'] ?? ''),
-                      subtitle: Text(
-                        data['category']?.toUpperCase() ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade700,
-                          fontFamily: GoogleFonts.roboto().fontFamily,
+                  return Dismissible(
+                    key: Key(doc.id),
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (direction) {
+                      final deletedData = doc.data() as Map<String, dynamic>;
+                      final deletedId = doc.id;
+
+                      _firestoreService.deleteExpense(deletedId);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text("Expense deleted"),
+                          action: SnackBarAction(
+                            label: "UNDO",
+                            textColor: Colors.white,
+                            onPressed: () {
+                              _firestoreService.restoreExpense(
+                                  deletedId, deletedData);
+                            },
+                          ),
                         ),
+                      );
+                    },
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      trailing: Text(
-                        '₹${data['amount']}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          fontFamily: GoogleFonts.roboto().fontFamily,
+                      child: ListTile(
+                        title: Text(data['title'] ?? ''),
+                        subtitle: Text(
+                          data['category']?.toUpperCase() ?? '',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                            fontFamily: GoogleFonts.roboto().fontFamily,
+                          ),
+                        ),
+                        trailing: Text(
+                          '₹${data['amount']}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            fontFamily: GoogleFonts.roboto().fontFamily,
+                          ),
                         ),
                       ),
                     ),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expense_tracker/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/expense.dart';
 
 class FirestoreService {
@@ -41,5 +42,19 @@ class FirestoreService {
         .collection('expenses')
         .doc(id)
         .delete();
+  }
+
+  Future<void> restoreExpense(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('expenses')
+        .doc(id)
+        .set(data);
   }
 }
