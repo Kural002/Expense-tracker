@@ -187,8 +187,8 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                             title: titleController.text.trim(),
                             amount: amount,
                             date: selectedDate ?? DateTime.now(),
-                            category: selectedCategory,
                             paymentType: selectedPayment,
+                            categoryLabel: '',
                           );
 
                           _firestoreService.addExpense(expense);
