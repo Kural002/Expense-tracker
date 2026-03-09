@@ -9,6 +9,7 @@ import 'package:expense_tracker/services/firestore_service.dart';
 import 'package:expense_tracker/widgets/custom_textfield/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,6 +23,7 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
   int _selectedIndex = 0;
   final _firestoreService = FirestoreService();
   DateTime selectedMonth = DateTime.now();
+  final logger = Logger();
 
   final List<Widget> _pages = [
     HomeScreen(),
@@ -41,7 +43,6 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
 
     DateTime? selectedDate;
     Category selectedCategory = categoryMap['others']!;
-    PaymentType selectedPayment = PaymentType.upi;
 
     showModalBottomSheet(
       context: context,
@@ -144,20 +145,15 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                       builder: (context, provider, _) {
                         return CupertinoSlidingSegmentedControl<PaymentType>(
                           groupValue: provider.paymentType,
-                          padding: const EdgeInsets.all(4),
                           children: const {
-                            PaymentType.cash: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text('Cash'),
-                            ),
-                            PaymentType.upi: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Text('UPI'),
-                            ),
+                            PaymentType.upi: Text("UPI"),
+                            PaymentType.cash: Text("Cash"),
                           },
                           onValueChanged: (value) {
                             if (value != null) {
                               provider.setPaymentType(value);
+                              logger.d(
+                                  "Selected payment in UI: ${provider.paymentType}");
                             }
                           },
                         );
@@ -187,7 +183,8 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                             title: titleController.text.trim(),
                             amount: amount,
                             date: selectedDate ?? DateTime.now(),
-                            paymentType: selectedPayment,
+                            paymentType:
+                                context.read<ExpenseProvider>().paymentType,
                             categoryLabel: '',
                           );
 

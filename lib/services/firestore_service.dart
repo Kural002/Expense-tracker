@@ -1,15 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expense_tracker/services/auth_service.dart';
+import 'package:expense_tracker/services/hive_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/expense.dart';
 
 class FirestoreService {
   final _db = FirebaseFirestore.instance;
   final _authService = AuthService();
+  final _hiveService = HiveService();
 
   Future<void> addExpense(Expense expense) async {
     final user = _authService.currentUser;
+
     if (user == null) return;
+
+    await _hiveService.addExpense(expense);
 
     await _db
         .collection('users')

@@ -23,12 +23,14 @@ class ExpenseProvider extends ChangeNotifier {
     _firestoreService.deleteExpense(id);
   }
 
-  void addExpense(Expense expense) {
-    _firestoreService.addExpense(expense);
+  void addExpense(Expense expense) async {
+    await _firestoreService.addExpense(expense);
   }
 
   void setPaymentType(PaymentType value) {
     _paymentType = value;
+    print("Selected payment: $_paymentType");
+
     notifyListeners();
   }
 }

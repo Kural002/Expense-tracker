@@ -228,12 +228,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Center(
                       child: e.paymentType == PaymentType.upi
                           ? Icon(
-                              FontAwesomeIcons.coins,
+                              FontAwesomeIcons.googlePay,
                               size: 18,
                               color: Colors.grey,
                             )
                           : Icon(
-                              FontAwesomeIcons.googlePay,
+                              FontAwesomeIcons.coins,
                               size: 18,
                               color: Colors.grey,
                             ),

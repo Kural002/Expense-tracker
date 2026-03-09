@@ -4,19 +4,19 @@ import '../models/expense.dart';
 class HiveService {
   final Box<Expense> expenseBox = Hive.box<Expense>('expenses');
 
-  void addExpense(Expense expense) {
-    expenseBox.put(expense.id, expense);
+  Future<void> addExpense(Expense expense) async {
+    await expenseBox.put(expense.id, expense);
   }
 
-  List<Expense> getExpenses() {
+  Future<List<Expense>> getExpenses() async {
     return expenseBox.values.toList();
   }
 
-  void deleteExpense(String id) {
-    expenseBox.delete(id);
+  Future<void> deleteExpense(String id) async {
+    await expenseBox.delete(id);
   }
 
-  void updateExpense(Expense expense) {
-    expenseBox.put(expense.id, expense);
+  Future<void> updateExpense(Expense expense) async {
+    await expenseBox.put(expense.id, expense);
   }
 }
