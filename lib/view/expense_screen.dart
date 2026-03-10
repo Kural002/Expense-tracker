@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart'
+    show showMonthPicker;
 
 class ExpenseScreen extends StatefulWidget {
   const ExpenseScreen({super.key});
@@ -25,7 +27,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: Colors.grey.shade50,
         title: Text(
-          "Expense Tracker",
+          "Expenses",
           style: TextStyle(
             color: Colors.black,
             fontSize: 24,
@@ -35,17 +37,27 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                groupByMonth = !groupByMonth;
-              });
-            },
-            icon: Icon(
-              groupByMonth
-                  ? Icons.calendar_view_day
-                  : Icons.calendar_view_month,
-              color: Colors.grey.shade800,
+          Padding(
+            padding: const EdgeInsets.all(9.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                onPressed: () {
+                  setState(() {
+                    groupByMonth = !groupByMonth;
+                  });
+                },
+                icon: Icon(
+                  groupByMonth
+                      ? Icons.calendar_view_day
+                      : Icons.calendar_view_month,
+                  color: Colors.grey.shade800,
+                ),
+              ),
             ),
           ),
         ],
@@ -71,15 +83,30 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.grey.shade300,
         onPressed: () async {
-          final picked = await showDatePicker(
+          final picked = await showMonthPicker(
             context: context,
             initialDate: selectedMonth,
             firstDate: DateTime(2020),
             lastDate: DateTime.now(),
+            monthStylePredicate: (date) {
+              if (date.month == selectedMonth.month &&
+                  date.year == selectedMonth.year) {
+                return ButtonStyle(
+                  backgroundColor:
+                      WidgetStateProperty.all(Colors.grey.shade800),
+                  foregroundColor: WidgetStateProperty.all(Colors.white),
+                );
+              }
+
+              return ButtonStyle(
+                foregroundColor: WidgetStateProperty.all(Colors.black),
+              );
+            },
           );
+
           if (picked != null) {
             setState(() {
-              selectedMonth = DateTime(picked.year, picked.month);
+              selectedMonth = picked;
             });
           }
         },

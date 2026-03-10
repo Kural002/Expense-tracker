@@ -51,6 +51,7 @@ dependencies:
   font_awesome_flutter: ^10.12.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  month_picker_dialog: ^6.7.2
   
 
 dev_dependencies:

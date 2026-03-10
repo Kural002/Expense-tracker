@@ -185,7 +185,7 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                             date: selectedDate ?? DateTime.now(),
                             paymentType:
                                 context.read<ExpenseProvider>().paymentType,
-                            categoryLabel: '',
+                            categoryLabel: selectedCategory.label.toLowerCase(),
                           );
 
                           _firestoreService.addExpense(expense);
@@ -266,8 +266,7 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        color: Colors.grey.shade100,
-        shape: const CircularNotchedRectangle(),
+        color: Colors.grey.shade200,
         notchMargin: 8.0,
         child: SizedBox(
           height: 60,
@@ -279,7 +278,7 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.home_max_rounded,
+                      Icon(Icons.home_max_sharp,
                           color:
                               _selectedIndex == 0 ? Colors.black : Colors.grey),
                       Text(
@@ -301,7 +300,7 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.track_changes_rounded,
+                      Icon(Icons.bar_chart_rounded,
                           color:
                               _selectedIndex == 1 ? Colors.black : Colors.grey),
                       Text(

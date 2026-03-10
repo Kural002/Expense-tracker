@@ -53,7 +53,7 @@ class Expense extends HiveObject {
       title: data['title'],
       amount: (data['amount'] as num).toDouble(),
       date: DateTime.parse(data['date']),
-      categoryLabel: data['category'],
+      categoryLabel: data['category'].toString().toLowerCase(),
       paymentType:
           data['paymentType'] == 'upi' ? PaymentType.upi : PaymentType.cash,
     );

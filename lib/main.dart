@@ -36,7 +36,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Expense Tracker',
-      theme: ThemeData(primarySwatch: Colors.teal),
+      theme: ThemeData(
+          primaryColor: Colors.grey.shade300,
+          datePickerTheme: DatePickerThemeData(
+            backgroundColor: Colors.white,
+          )),
       home: const SplashScreen(),
     );
   }
