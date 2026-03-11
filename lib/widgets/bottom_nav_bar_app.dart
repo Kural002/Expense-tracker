@@ -13,6 +13,7 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class BottomNavBarApp extends StatefulWidget {
   @override
@@ -29,6 +30,47 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
     HomeScreen(),
     ExpenseScreen(),
   ];
+
+  // ⭐ CHECK INTERNET WHEN APP STARTS
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkInternetOnStart();
+    });
+  }
+
+  Future<void> _checkInternetOnStart() async {
+    final result = await Connectivity().checkConnectivity();
+
+    if (result == ConnectivityResult.none) {
+      _showNoInternetDialog();
+    }
+  }
+
+  void _showNoInternetDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("No Internet"),
+          content: const Text(
+            "You are currently offline. Expenses will sync when internet returns.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -92,17 +134,23 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
+
+                    /// TITLE
                     CustomTextField(
                       controller: titleController,
                       label: "Title",
                     ),
                     const SizedBox(height: 12),
+
+                    /// AMOUNT
                     CustomTextField(
                       controller: amountController,
                       label: "Amount",
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 12),
+
+                    /// CATEGORY
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
@@ -121,7 +169,10 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                         },
                       ),
                     ),
+
                     const SizedBox(height: 12),
+
+                    /// DATE
                     TextField(
                       controller: dateController,
                       readOnly: true,
@@ -140,7 +191,10 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                         }
                       },
                     ),
+
                     const SizedBox(height: 12),
+
+                    /// PAYMENT TYPE
                     Consumer<ExpenseProvider>(
                       builder: (context, provider, _) {
                         return CupertinoSlidingSegmentedControl<PaymentType>(
@@ -153,13 +207,16 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                             if (value != null) {
                               provider.setPaymentType(value);
                               logger.d(
-                                  "Selected payment in UI: ${provider.paymentType}");
+                                  "Selected payment: ${provider.paymentType}");
                             }
                           },
                         );
                       },
                     ),
+
                     const SizedBox(height: 20),
+
+                    /// ADD BUTTON
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -178,6 +235,7 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                             );
                             return;
                           }
+
                           final expense = Expense(
                             id: const Uuid().v4(),
                             title: titleController.text.trim(),
@@ -218,28 +276,18 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
 
   InputDecoration _dateInputDecoration() {
     return InputDecoration(
-      labelText: "${DateFormat('yyyy-MM-dd').format(DateTime.now())} ",
-      labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      labelText: DateFormat('yyyy-MM-dd').format(DateTime.now()),
       filled: true,
       fillColor: Colors.white,
       contentPadding:
           const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
       border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        borderSide: BorderSide(color: Colors.grey),
-      ),
-      enabledBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        borderSide: BorderSide(color: Colors.grey),
-      ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-        borderSide: BorderSide(color: Colors.black, width: 2),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
     );
   }
 
-  void _handleFABPressed() async {
+  void _handleFABPressed() {
     if (_selectedIndex == 0) {
       _showAddExpenseDialog(context);
     }
@@ -250,24 +298,22 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: _pages[_selectedIndex],
+
+      /// FAB
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
               onPressed: _handleFABPressed,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30)),
-              ),
               backgroundColor: Colors.grey.shade300,
-              child: Icon(
-                Icons.add,
-                size: 25,
-                color: Colors.grey.shade800,
-              ),
+              child: Icon(Icons.add, color: Colors.grey.shade800),
             )
           : null,
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      /// BOTTOM NAV
       bottomNavigationBar: BottomAppBar(
         color: Colors.grey.shade200,
-        notchMargin: 8.0,
+        notchMargin: 8,
         child: SizedBox(
           height: 60,
           child: Row(
@@ -281,14 +327,11 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                       Icon(Icons.home_max_sharp,
                           color:
                               _selectedIndex == 0 ? Colors.black : Colors.grey),
-                      Text(
-                        "Home",
-                        style: TextStyle(
-                          color:
-                              _selectedIndex == 0 ? Colors.black : Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
+                      Text("Home",
+                          style: TextStyle(
+                              color: _selectedIndex == 0
+                                  ? Colors.black
+                                  : Colors.grey)),
                     ],
                   ),
                 ),
@@ -303,14 +346,11 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
                       Icon(Icons.bar_chart_rounded,
                           color:
                               _selectedIndex == 1 ? Colors.black : Colors.grey),
-                      Text(
-                        "Expenses",
-                        style: TextStyle(
-                          color:
-                              _selectedIndex == 1 ? Colors.black : Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
+                      Text("Expenses",
+                          style: TextStyle(
+                              color: _selectedIndex == 1
+                                  ? Colors.black
+                                  : Colors.grey)),
                     ],
                   ),
                 ),
