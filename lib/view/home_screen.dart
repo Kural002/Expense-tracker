@@ -1,5 +1,5 @@
 import 'package:expense_tracker/models/payment_type.dart';
-import 'package:expense_tracker/view/on_boarding_screen.dart';
+import 'package:expense_tracker/view/login_screen.dart';
 import 'package:expense_tracker/widgets/chart/chart.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => OnBoardingScreen(),
+                  builder: (context) => LoginScreen(),
                 ),
               );
             },
@@ -55,72 +55,79 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-      body: StreamBuilder<List<Expense>>(
-        stream: _firestoreService.getExpenses(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-                child: Text('Something went wrong: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Builder(builder: (context) {
+        final user = _authService.currentUser;
 
-          final expenses = snapshot.data!;
+        if (user == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return StreamBuilder<List<Expense>>(
+          stream: _firestoreService.getExpenses(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Center(
+                  child: Text('Something went wrong: ${snapshot.error}'));
+            }
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final today = DateTime.now();
-          final todayExpenses = expenses.where((e) {
-            return e.date.year == today.year &&
-                e.date.month == today.month &&
-                e.date.day == today.day;
-          }).toList();
+            final expenses = snapshot.data!;
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final isWideScreen = constraints.maxWidth > 600;
+            final today = DateTime.now();
+            final todayExpenses = expenses.where((e) {
+              return e.date.year == today.year &&
+                  e.date.month == today.month &&
+                  e.date.day == today.day;
+            }).toList();
 
-              if (isWideScreen) {
-                return Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Expanded(child: Chart(expenses: todayExpenses)),
-                          ],
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isWideScreen = constraints.maxWidth > 600;
+
+                if (isWideScreen) {
+                  return Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              Expanded(child: Chart(expenses: todayExpenses)),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      flex: 3,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: _buildExpenseList(todayExpenses),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return Column(
+                    children: [
+                      _buildTodayHeader(),
+                      SizedBox(
+                        height: 200,
+                        child: Chart(expenses: todayExpenses),
+                      ),
+                      Expanded(
                         child: _buildExpenseList(todayExpenses),
                       ),
-                    ),
-                  ],
-                );
-              } else {
-                return Column(
-                  children: [
-                    _buildTodayHeader(),
-                    SizedBox(
-                      height: 200,
-                      child: Chart(expenses: todayExpenses),
-                    ),
-                    Expanded(
-                      child: _buildExpenseList(todayExpenses),
-                    ),
-                  ],
-                );
-              }
-            },
-          );
-        },
-      ),
+                    ],
+                  );
+                }
+              },
+            );
+          },
+        );
+      }),
     );
   }
 

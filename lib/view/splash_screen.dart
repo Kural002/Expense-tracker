@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:expense_tracker/view/on_boarding_screen.dart';
 import 'package:expense_tracker/utilities/app_Image_path.dart';
+import 'package:expense_tracker/view/login_screen.dart';
 import 'package:expense_tracker/widgets/bottom_nav_bar_app.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,20 +13,30 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final user = FirebaseAuth.instance.currentUser;
-
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), () {
+    _navigateUser();
+  }
+
+  Future<void> _navigateUser() async {
+    await Future.delayed(const Duration(seconds: 2));
+
+    final user = await FirebaseAuth.instance.authStateChanges().first;
+    if (user != null) {
+      try {
+        await user.getIdToken(true);
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => BottomNavBarApp()));
+      } catch (e) {
+        await FirebaseAuth.instance.signOut();
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => LoginScreen()));
+      }
+    } else {
       Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              user != null ? BottomNavBarApp() : OnBoardingScreen(),
-        ),
-      );
-    });
+          context, MaterialPageRoute(builder: (_) => LoginScreen()));
+    }
   }
 
   @override
@@ -42,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
               height: 180,
               fit: BoxFit.contain,
             ),
-          
+            const SizedBox(height: 20),
             const CircularProgressIndicator(),
           ],
         ),
