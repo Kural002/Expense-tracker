@@ -60,8 +60,8 @@ class _LoginScreenState extends State<LoginScreen> {
             Center(
               child: Image.asset(
                 AppImagePath.expense,
-                height: 400,
-                width: 400,
+                height: 300,
+                width: 300,
               ),
             ),
             ExpenseFlipper(),
