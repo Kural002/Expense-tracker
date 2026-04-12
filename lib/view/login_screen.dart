@@ -1,10 +1,7 @@
-import 'package:expense_tracker/utilities/app_Image_path.dart';
-import 'package:expense_tracker/utilities/app_colors.dart';
-import 'package:expense_tracker/widgets/ExpenseFlipper%20.dart';
-import 'package:expense_tracker/widgets/bottom_nav_bar_app.dart';
+import 'package:expense_tracker/utilities/app_image_path.dart';
+import 'package:expense_tracker/widgets/transaction_flipper.dart';
 import 'package:expense_tracker/widgets/google_button.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,68 +15,125 @@ class _LoginScreenState extends State<LoginScreen> {
   final _authService = AuthService();
 
   void _login() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
     final user = await _authService.signInWithGoogle();
-    if (user != null) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => BottomNavBarApp(),
-        ),
-        (route) => false,
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed. Please try again.')),
+    
+    if (user == null) {
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Login failed. Please try again.')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      backgroundColor: AppColor.kWhite,
-      appBar: AppBar(
-        backgroundColor: AppColor.kWhite,
-        title: Text(
-          'Login',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 20,
-          children: [
-            Center(
-              child: Image.asset(
-                AppImagePath.expense,
-                height: 300,
-                width: 300,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Stack(
+        children: [
+          // Premium Glowing Background
+          Positioned(
+            top: -100,
+            left: -100,
+            child: Container(
+              width: size.width * 0.8,
+              height: size.width * 0.8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.colorScheme.primary.withValues(alpha: 0.15),
               ),
             ),
-            ExpenseFlipper(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-          padding: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 30.0),
-          child: MediaQuery.of(context).size.width < 600
-              ? GoogleButton(
-                  onPressed: _login,
-                )
-              : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 750.0),
-                  child: GoogleButton(
-                    onPressed: _login,
+          ),
+          Positioned(
+            bottom: -50,
+            right: -50,
+            child: Container(
+              width: size.width * 0.6,
+              height: size.width * 0.6,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.colorScheme.secondary.withValues(alpha: 0.1),
+              ),
+            ),
+          ),
+          // Blur effect
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ColorFilter.mode(
+                theme.scaffoldBackgroundColor.withValues(alpha: 0.5),
+                BlendMode.srcOver,
+              ),
+              child: const SizedBox.expand(),
+            ),
+          ),
+          // Main Content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(),
+                  // Premium App Icon/Asset
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          blurRadius: 40,
+                          spreadRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      AppImagePath.expense,
+                      height: 220,
+                      width: 220,
+                    ),
                   ),
-                )),
+                  const SizedBox(height: 40),
+                  // Typographic Title
+                  Text(
+                    "Master Your\nFinances",
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      height: 1.1,
+                      letterSpacing: -1,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Track expenses, optimize savings, and secure your financial future perfectly synced to your style.",
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  const TransactionFlipper(),
+                  const Spacer(),
+                  // Auth Button Area
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    width: size.width > 600 ? 400 : double.infinity,
+                    child: GoogleButton(
+                      onPressed: _login,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

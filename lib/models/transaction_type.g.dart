@@ -1,34 +1,34 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'payment_type.dart';
+part of 'transaction_type.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class PaymentTypeAdapter extends TypeAdapter<PaymentType> {
+class TransactionTypeAdapter extends TypeAdapter<TransactionType> {
   @override
-  final int typeId = 1;
+  final int typeId = 2;
 
   @override
-  PaymentType read(BinaryReader reader) {
+  TransactionType read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return PaymentType.upi;
+        return TransactionType.expense;
       case 1:
-        return PaymentType.cash;
+        return TransactionType.income;
       default:
-        return PaymentType.upi;
+        return TransactionType.expense;
     }
   }
 
   @override
-  void write(BinaryWriter writer, PaymentType obj) {
+  void write(BinaryWriter writer, TransactionType obj) {
     switch (obj) {
-      case PaymentType.upi:
+      case TransactionType.expense:
         writer.writeByte(0);
         break;
-      case PaymentType.cash:
+      case TransactionType.income:
         writer.writeByte(1);
         break;
     }
@@ -40,7 +40,7 @@ class PaymentTypeAdapter extends TypeAdapter<PaymentType> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PaymentTypeAdapter &&
+      other is TransactionTypeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

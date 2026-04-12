@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:intl/intl.dart'; // For currency formatting
 
-class ExpenseFlipper extends StatefulWidget {
-  const ExpenseFlipper({super.key});
+class TransactionFlipper extends StatefulWidget {
+  const TransactionFlipper({super.key});
 
   @override
-  State<ExpenseFlipper> createState() => _ExpenseFlipperState();
+  State<TransactionFlipper> createState() => _TransactionFlipperState();
 }
 
-class _ExpenseFlipperState extends State<ExpenseFlipper> {
+class _TransactionFlipperState extends State<TransactionFlipper> {
   late Stream<double> _expenseStream;
 
   @override
@@ -33,6 +33,7 @@ class _ExpenseFlipperState extends State<ExpenseFlipper> {
           decimalDigits: 2,
         );
 
+        final theme = Theme.of(context);
         return AnimatedFlipCounter(
           value: value,
           fractionDigits: 2,
@@ -42,7 +43,7 @@ class _ExpenseFlipperState extends State<ExpenseFlipper> {
           textStyle: TextStyle(
             fontSize: 40,
             fontWeight: FontWeight.bold,
-            color: value >= 0 ? Colors.green : Colors.red, // Green for income, red for expenses
+            color: value >= 0 ? theme.colorScheme.primary : theme.colorScheme.error,
           ),
         );
       },

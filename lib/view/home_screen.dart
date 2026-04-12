@@ -1,302 +1,326 @@
-import 'package:expense_tracker/models/payment_type.dart';
-import 'package:expense_tracker/view/login_screen.dart';
-import 'package:expense_tracker/widgets/chart/chart.dart';
+import 'package:expense_tracker/models/transaction.dart';
+import 'package:expense_tracker/models/transaction_type.dart';
+import 'package:expense_tracker/utilities/transaction_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../models/expense.dart';
-import '../services/firestore_service.dart';
-import '../services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  final _firestoreService = FirestoreService();
-  final _authService = AuthService();
-
-  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        backgroundColor: Colors.grey.shade50,
-        title: Text(
-          "Expense Tracker",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            fontFamily: GoogleFonts.poppins().fontFamily,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Welcome back, ${FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? 'User'}!",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+            ),
+            Text(
+              "Finance Overview",
+              style: theme.textTheme.titleLarge,
+            ),
+          ],
         ),
-        centerTitle: true,
+        centerTitle: false,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            onPressed: () {
-              _authService.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LoginScreen(),
-                ),
-              );
-            },
-            icon: Icon(
-              Icons.logout,
-              color: Colors.grey.shade800,
-            ),
-          )
+          const SizedBox(width: 8),
         ],
       ),
-      body: Builder(builder: (context) {
-        final user = _authService.currentUser;
+      body: Consumer<TransactionProvider>(
+        builder: (context, provider, child) {
+          final transactions = provider.transactions;
+          final recentTransactions = transactions.take(10).toList();
 
-        if (user == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return StreamBuilder<List<Expense>>(
-          stream: _firestoreService.getExpenses(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(
-                  child: Text('Something went wrong: ${snapshot.error}'));
-            }
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final expenses = snapshot.data!;
-
-            final today = DateTime.now();
-            final todayExpenses = expenses.where((e) {
-              return e.date.year == today.year &&
-                  e.date.month == today.month &&
-                  e.date.day == today.day;
-            }).toList();
-
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final isWideScreen = constraints.maxWidth > 600;
-
-                if (isWideScreen) {
-                  return Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              Expanded(child: Chart(expenses: todayExpenses)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        flex: 3,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: _buildExpenseList(todayExpenses),
-                        ),
-                      ),
-                    ],
-                  );
-                } else {
-                  return Column(
-                    children: [
-                      _buildTodayHeader(),
-                      SizedBox(
-                        height: 200,
-                        child: Chart(expenses: todayExpenses),
-                      ),
-                      Expanded(
-                        child: _buildExpenseList(todayExpenses),
-                      ),
-                    ],
-                  );
-                }
-              },
-            );
-          },
-        );
-      }),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                _buildBalanceCard(context, provider),
+                const SizedBox(height: 32),
+                _buildSectionHeader(context, "Recent Transactions", () {}),
+                const SizedBox(height: 16),
+                _buildTransactionList(context, recentTransactions),
+                const SizedBox(height: 100), // Spacing for floating navbar
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildExpenseList(List<Expense> expenses) {
-    if (expenses.isEmpty) {
-      return Center(
-        child: Text(
-          "No expenses today.\nAdd your expense!",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey.shade600,
+  Widget _buildBalanceCard(BuildContext context, TransactionProvider provider) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primary,
+            colorScheme.primary.withValues(alpha: 0.7),
+            colorScheme.tertiary.withValues(alpha: 0.6),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(36),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Total Balance",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "₹${provider.totalBalance.toStringAsFixed(0)}",
+                    style: theme.textTheme.displayLarge?.copyWith(
+                      color: Colors.white,
+                      fontSize: 36,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.account_balance_wallet_rounded,
+                    color: Colors.white, size: 28),
+              ),
+            ],
           ),
+          const SizedBox(height: 36),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildBalanceInfo(
+                  context,
+                  "Income",
+                  "₹${provider.totalIncome.toStringAsFixed(0)}",
+                  Icons.arrow_upward_rounded,
+                  colorScheme.secondary,
+                ),
+                Container(
+                  width: 1,
+                  height: 30,
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
+                _buildBalanceInfo(
+                  context,
+                  "Expenses",
+                  "₹${provider.totalExpense.toStringAsFixed(0)}",
+                  Icons.arrow_downward_rounded,
+                  const Color(0xFFFB7185), // Rose 400
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBalanceInfo(BuildContext context, String label, String amount,
+      IconData icon, Color iconColor) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: iconColor, size: 14),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 10,
+              ),
+            ),
+            Text(
+              amount,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(
+      BuildContext context, String title, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleLarge?.copyWith(fontSize: 18),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: TextButton(
+            onPressed: onTap,
+            child: Text(
+              "See All",
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildTransactionList(
+      BuildContext context, List<Transaction> transactions) {
+    final theme = Theme.of(context);
+    if (transactions.isEmpty) {
+      return Center(
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            Icon(Icons.receipt_long_rounded,
+                size: 64,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.05)),
+            const SizedBox(height: 16),
+            Text(
+              "No transactions yet",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+          ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: expenses.length,
-      itemBuilder: (_, i) {
-        final e = expenses[i];
-        return Dismissible(
-          key: Key(e.id),
-          direction: DismissDirection.endToStart,
-          onDismissed: (direction) {
-            final deletedExpense = e;
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: transactions.length,
+      itemBuilder: (context, index) {
+        final tx = transactions[index];
+        final isIncome = tx.type == TransactionType.income;
 
-            _firestoreService.deleteExpense(deletedExpense.id);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text("Expense deleted"),
-                action: SnackBarAction(
-                  label: "UNDO",
-                  textColor: Colors.white,
-                  onPressed: () {
-                    _firestoreService.addExpense(deletedExpense);
-                  },
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.05)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: tx.category.color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child:
+                    Icon(tx.category.icon, color: tx.category.color, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tx.title,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat('MMM dd, yyyy').format(tx.date),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.red.shade700,
-            ),
-            child: const Icon(Icons.delete, color: Colors.white),
-          ),
-          child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 6),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      e.category.icon,
-                      size: 20,
-                      color: Colors.grey.shade800,
+                  Text(
+                    "${isIncome ? '+' : '-'} ₹${tx.amount.toStringAsFixed(0)}",
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isIncome
+                          ? theme.colorScheme.secondary
+                          : const Color(0xFFFB7185),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          e.title,
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          DateFormat('dd MMM yyyy').format(e.date),
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade600),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "₹${e.amount.toStringAsFixed(2)}",
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 70,
-                    child: Center(
-                      child: e.paymentType == PaymentType.upi
-                          ? Icon(
-                              FontAwesomeIcons.googlePay,
-                              size: 18,
-                              color: Colors.grey,
-                            )
-                          : Icon(
-                              FontAwesomeIcons.coins,
-                              size: 18,
-                              color: Colors.grey,
-                            ),
-                    ),
+                  const SizedBox(height: 4),
+                  Text(
+                    tx.categoryLabel,
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
-              )),
+              ),
+            ],
+          ),
         );
       },
     );
   }
-}
-
-Widget _buildTodayHeader() {
-  final now = DateTime.now();
-
-  final dayName = DateFormat('EEEE').format(now);
-  final dateText = DateFormat('dd MMM yyyy').format(now);
-
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Today",
-              style: TextStyle(
-                fontSize: 12,
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Text(
-              dayName,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: GoogleFonts.poppins().fontFamily,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-        Text(
-          dateText,
-          style: TextStyle(
-            fontSize: 14,
-            fontFamily: GoogleFonts.poppins().fontFamily,
-            color: Colors.grey.shade800,
-          ),
-        ),
-      ],
-    ),
-  );
 }

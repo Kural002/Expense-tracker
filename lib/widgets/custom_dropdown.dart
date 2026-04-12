@@ -10,8 +10,7 @@ class CustomDropdownExample extends StatefulWidget {
 }
 
 class _CustomDropdownExampleState extends State<CustomDropdownExample> {
-  Category _selectedCategory = categoryMap['others']!;
-  String? _selectedValue;
+  final Category _selectedCategory = categoryMap['others']!;
 
   Future<List<String>> getFakeRequestData(String query) async {
     List<String> data = _selectedCategory.label.split(' ');
@@ -34,11 +33,7 @@ class _CustomDropdownExampleState extends State<CustomDropdownExample> {
         );
       },
       hintText: 'Select Category',
-      onChanged: (value) {
-        setState(() {
-          _selectedValue = value;
-        });
-      },
+      onChanged: (value) {},
       futureRequestDelay: const Duration(seconds: 1),
     );
   }

@@ -1,11 +1,12 @@
+import 'package:expense_tracker/models/transaction_type.dart';
 import 'package:hive/hive.dart';
 import 'package:expense_tracker/models/payment_type.dart';
 import 'categories_data.dart' as custom;
 
-part 'expense.g.dart';
+part 'transaction.g.dart';
 
 @HiveType(typeId: 0)
-class Expense extends HiveObject {
+class Transaction extends HiveObject {
   @HiveField(0)
   final String id;
 
@@ -24,17 +25,25 @@ class Expense extends HiveObject {
   @HiveField(5)
   final String categoryLabel;
 
-  Expense({
+  @HiveField(6)
+  final TransactionType type;
+
+  @HiveField(7)
+  final DateTime? deletedAt;
+
+  Transaction({
     required this.id,
     required this.title,
     required this.amount,
     required this.paymentType,
     required this.categoryLabel,
+    this.type = TransactionType.expense,
+    this.deletedAt,
     DateTime? date,
   }) : date = date ?? DateTime.now();
 
   custom.Category get category =>
-      custom.categoryMap[categoryLabel] ?? custom.categoryMap['others']!;
+      custom.categoryMap[categoryLabel.toLowerCase()] ?? custom.categoryMap['others']!;
 
   Map<String, dynamic> toMap() {
     return {
@@ -44,18 +53,21 @@ class Expense extends HiveObject {
       'date': date.toIso8601String(),
       'category': categoryLabel,
       'paymentType': paymentType.name,
+      'type': type.name,
+      'deletedAt': deletedAt?.toIso8601String(),
     };
   }
 
-  factory Expense.fromMap(Map<String, dynamic> data) {
-    return Expense(
+  factory Transaction.fromMap(Map<String, dynamic> data) {
+    return Transaction(
       id: data['id'],
       title: data['title'],
       amount: (data['amount'] as num).toDouble(),
       date: DateTime.parse(data['date']),
       categoryLabel: data['category'].toString().toLowerCase(),
-      paymentType:
-          data['paymentType'] == 'upi' ? PaymentType.upi : PaymentType.cash,
+      paymentType: data['paymentType'] == 'upi' ? PaymentType.upi : PaymentType.cash,
+      type: data['type'] == 'income' ? TransactionType.income : TransactionType.expense,
+      deletedAt: data['deletedAt'] != null ? DateTime.parse(data['deletedAt']) : null,
     );
   }
 }

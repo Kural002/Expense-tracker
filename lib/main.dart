@@ -1,31 +1,52 @@
-import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/models/transaction.dart';
+import 'package:expense_tracker/models/transaction_type.dart';
 import 'package:expense_tracker/models/payment_type.dart';
-import 'package:expense_tracker/utilities/expense_provider.dart';
+import 'package:expense_tracker/utilities/app_theme.dart';
+import 'package:expense_tracker/utilities/theme_provider.dart';
+import 'package:expense_tracker/utilities/transaction_provider.dart';
 import 'package:expense_tracker/view/splash_screen.dart';
 import 'package:expense_tracker/services/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:expense_tracker/view/login_screen.dart';
+import 'package:expense_tracker/view/main_navigation_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:logger/logger.dart';
+
+final logger = Logger();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
+  
+  try {
+    await Hive.initFlutter();
 
-  Hive.registerAdapter(ExpenseAdapter());
-  Hive.registerAdapter(PaymentTypeAdapter());
+    Hive.registerAdapter(TransactionAdapter());
+    Hive.registerAdapter(TransactionTypeAdapter());
+    Hive.registerAdapter(PaymentTypeAdapter());
 
-  await Hive.openBox<Expense>('expenses');
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ExpenseProvider(),
-      child: MyApp(),
-    ),
-  );
+    await Hive.openBox<Transaction>('transactions');
+    
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => TransactionProvider()),
+          ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ],
+        child: const MyApp(),
+      ),
+    );
+  } catch (e) {
+    logger.e("Critical initialization error: $e");
+    // Run minimal app to show error if necessary
+    runApp(MaterialApp(home: Scaffold(body: Center(child: Text("Startup Error: $e")))));
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -33,15 +54,33 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Expense Tracker',
-      theme: ThemeData(
-          primaryColor: Colors.grey.shade300,
-          datePickerTheme: DatePickerThemeData(
-            backgroundColor: Colors.white,
-          )),
-      home: const SplashScreen(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Expense Tracker',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
+          home: StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, snapshot) {
+              // Show splash while waiting for initial connection
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SplashScreen();
+              }
+              
+              // If we have a user, go to Home
+              if (snapshot.hasData && snapshot.data != null) {
+                return const MainNavigationScreen();
+              }
+              
+              // Otherwise (no user), go to Login
+              return const LoginScreen();
+            },
+          ),
+        );
+      },
     );
   }
 }

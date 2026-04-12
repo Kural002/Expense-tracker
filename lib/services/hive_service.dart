@@ -1,22 +1,26 @@
 import 'package:hive/hive.dart';
-import '../models/expense.dart';
+import '../models/transaction.dart';
 
 class HiveService {
-  final Box<Expense> expenseBox = Hive.box<Expense>('expenses');
+  final Box<Transaction> transactionBox = Hive.box<Transaction>('transactions');
 
-  Future<void> addExpense(Expense expense) async {
-    await expenseBox.put(expense.id, expense);
+  Future<void> addTransaction(Transaction transaction) async {
+    await transactionBox.put(transaction.id, transaction);
   }
 
-  Future<List<Expense>> getExpenses() async {
-    return expenseBox.values.toList();
+  Future<List<Transaction>> getTransactions() async {
+    return transactionBox.values.toList();
   }
 
-  Future<void> deleteExpense(String id) async {
-    await expenseBox.delete(id);
+  Future<void> deleteTransaction(String id) async {
+    await transactionBox.delete(id);
   }
 
-  Future<void> updateExpense(Expense expense) async {
-    await expenseBox.put(expense.id, expense);
+  Future<void> updateTransaction(Transaction transaction) async {
+    await transactionBox.put(transaction.id, transaction);
+  }
+
+  Future<void> clearAll() async {
+    await transactionBox.clear();
   }
 }

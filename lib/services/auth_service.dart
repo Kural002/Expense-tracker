@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
@@ -28,7 +28,7 @@ class AuthService {
         return userCredential.user;
       }
     } catch (e) {
-      print('Google Sign-In error: $e');
+      debugPrint(e.toString());
       return null;
     }
   }
