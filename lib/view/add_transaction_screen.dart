@@ -6,27 +6,48 @@ import 'package:expense_tracker/utilities/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import '../services/ocr_service.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final String? initialAmount;
+  final String? initialTitle;
+
+  const AddTransactionScreen({
+    super.key,
+    this.initialAmount,
+    this.initialTitle,
+  });
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
-  final _titleController = TextEditingController();
-  final _amountController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _amountController;
   DateTime _selectedDate = DateTime.now();
   TransactionType _selectedType = TransactionType.expense;
   late Category _selectedCategory;
   PaymentType _selectedPaymentType = PaymentType.upi;
+  final _ocrService = OcrService();
+  bool _isScanning = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedCategory = getCategoriesByType(_selectedType).first;
+    _titleController = TextEditingController(text: widget.initialTitle);
+    _amountController = TextEditingController(text: widget.initialAmount);
+    _selectedCategory = getCategoriesByType(TransactionType.expense).first;
+  }
+
+  @override
+  void dispose() {
+    _ocrService.dispose();
+    _titleController.dispose();
+    _amountController.dispose();
+    super.dispose();
   }
 
   void _onTypeChanged(TransactionType type) {
@@ -58,6 +79,58 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     await context.read<TransactionProvider>().addTransaction(transaction);
     if (mounted) Navigator.pop(context);
   }
+
+  Future<void> _scanBill() async {
+    // Choice between Camera and Gallery
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded),
+              title: const Text('Capture with Camera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Pick from Gallery'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    setState(() => _isScanning = true);
+    
+    final result = source == ImageSource.camera 
+        ? await _ocrService.scanBill() 
+        : await _ocrService.pickFromGallery();
+
+    if (mounted) {
+      setState(() => _isScanning = false);
+      if (result != null) {
+        if (result.amount != null) {
+          _amountController.text = result.amount!.toStringAsFixed(0);
+        }
+        if (result.title != null) {
+          _titleController.text = result.title!;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Bill scanned!")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Scan cancelled or failed.")),
+        );
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +179,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               decoration: InputDecoration(
                 prefixText: "₹ ",
                 prefixStyle: theme.textTheme.displayLarge?.copyWith(color: colorScheme.primary),
+                suffixIcon: IconButton(
+                  onPressed: _isScanning ? null : _scanBill,
+                  icon: _isScanning 
+                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Icon(Icons.document_scanner_rounded, color: colorScheme.primary, size: 32),
+                ),
                 border: InputBorder.none,
                 hintText: "0",
               ),

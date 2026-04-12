@@ -62,25 +62,59 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode,
-          home: StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, snapshot) {
-              // Show splash while waiting for initial connection
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SplashScreen();
-              }
-              
-              // If we have a user, go to Home
-              if (snapshot.hasData && snapshot.data != null) {
-                return const MainNavigationScreen();
-              }
-              
-              // Otherwise (no user), go to Login
-              return const LoginScreen();
-            },
-          ),
+          home: const AuthWrapper(),
         );
       },
     );
   }
 }
+
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool _isInitializing = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _waitForInitialization();
+  }
+
+  Future<void> _waitForInitialization() async {
+    // Add a minimum delay to ensure smooth transition and allow Firebase Auth to settle
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (mounted) {
+      setState(() {
+        _isInitializing = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isInitializing) {
+      return const SplashScreen();
+    }
+
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SplashScreen();
+        }
+        
+        if (snapshot.hasData && snapshot.data != null) {
+          return const MainNavigationScreen();
+        }
+        
+        return const LoginScreen();
+      },
+    );
+  }
+}
+
