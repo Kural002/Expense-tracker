@@ -1,15 +1,15 @@
-import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/models/transaction_type.dart';
-import 'package:expense_tracker/models/payment_type.dart';
-import 'package:expense_tracker/utilities/app_theme.dart';
-import 'package:expense_tracker/utilities/theme_provider.dart';
-import 'package:expense_tracker/utilities/transaction_provider.dart';
-import 'package:expense_tracker/view/splash_screen.dart';
-import 'package:expense_tracker/services/firebase_options.dart';
+import 'package:expense_trace/models/transaction.dart';
+import 'package:expense_trace/models/transaction_type.dart';
+import 'package:expense_trace/models/payment_type.dart';
+import 'package:expense_trace/utilities/app_theme.dart';
+import 'package:expense_trace/utilities/theme_provider.dart';
+import 'package:expense_trace/utilities/transaction_provider.dart';
+import 'package:expense_trace/view/splash_screen.dart';
+import 'package:expense_trace/services/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:expense_tracker/view/login_screen.dart';
-import 'package:expense_tracker/view/main_navigation_screen.dart';
+import 'package:expense_trace/view/login_screen.dart';
+import 'package:expense_trace/view/main_navigation_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
       builder: (context, themeProvider, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Expense Tracker',
+          title: 'Expense Trace',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode,
@@ -87,7 +87,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   Future<void> _waitForInitialization() async {
     // Add a minimum delay to ensure smooth transition and allow Firebase Auth to settle
-    await Future.delayed(const Duration(milliseconds: 1500));
+    await Future.delayed(const Duration(milliseconds: 2200));
     if (mounted) {
       setState(() {
         _isInitializing = false;

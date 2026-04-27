@@ -27,8 +27,9 @@ class AuthService {
         final userCredential = await _auth.signInWithCredential(credential);
         return userCredential.user;
       }
-    } catch (e) {
-      debugPrint(e.toString());
+    } catch (e, stack) {
+      debugPrint("G-SIGNIN-ERROR: $e");
+      debugPrint("STACKTRACE: $stack");
       return null;
     }
   }

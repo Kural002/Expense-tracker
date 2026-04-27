@@ -1,6 +1,7 @@
-import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/models/transaction_type.dart';
-import 'package:expense_tracker/utilities/transaction_provider.dart';
+import 'package:expense_trace/models/transaction.dart';
+import 'package:expense_trace/models/transaction_type.dart';
+import 'package:expense_trace/utilities/currency_formatter.dart';
+import 'package:expense_trace/utilities/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -104,7 +105,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "₹${provider.totalBalance.toStringAsFixed(0)}",
+                    CurrencyFormatter.format(provider.totalBalance),
                     style: theme.textTheme.displayLarge?.copyWith(
                       color: Colors.white,
                       fontSize: 36,
@@ -136,7 +137,7 @@ class HomeScreen extends StatelessWidget {
                 _buildBalanceInfo(
                   context,
                   "Income",
-                  "₹${provider.totalIncome.toStringAsFixed(0)}",
+                  CurrencyFormatter.format(provider.totalIncome),
                   Icons.arrow_upward_rounded,
                   colorScheme.secondary,
                 ),
@@ -148,7 +149,7 @@ class HomeScreen extends StatelessWidget {
                 _buildBalanceInfo(
                   context,
                   "Expenses",
-                  "₹${provider.totalExpense.toStringAsFixed(0)}",
+                  CurrencyFormatter.format(provider.totalExpense),
                   Icons.arrow_downward_rounded,
                   const Color(0xFFFB7185), // Rose 400
                 ),
@@ -302,7 +303,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    "${isIncome ? '+' : '-'} ₹${tx.amount.toStringAsFixed(0)}",
+                    "${isIncome ? '+' : '-'} ${CurrencyFormatter.format(tx.amount)}",
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: isIncome

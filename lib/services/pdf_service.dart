@@ -1,5 +1,5 @@
-import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/models/transaction_type.dart';
+import 'package:expense_trace/models/transaction.dart';
+import 'package:expense_trace/models/transaction_type.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;

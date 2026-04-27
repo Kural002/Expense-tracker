@@ -1,8 +1,8 @@
-import 'package:expense_tracker/models/categories_data.dart';
-import 'package:expense_tracker/models/payment_type.dart';
-import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/models/transaction_type.dart';
-import 'package:expense_tracker/utilities/transaction_provider.dart';
+import 'package:expense_trace/models/categories_data.dart';
+import 'package:expense_trace/models/payment_type.dart';
+import 'package:expense_trace/models/transaction.dart';
+import 'package:expense_trace/models/transaction_type.dart';
+import 'package:expense_trace/utilities/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -115,7 +115,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       setState(() => _isScanning = false);
       if (result != null) {
         if (result.amount != null) {
-          _amountController.text = result.amount!.toStringAsFixed(0);
+          final amount = result.amount!;
+          _amountController.text = amount % 1 == 0 ? amount.toStringAsFixed(0) : amount.toStringAsFixed(2);
         }
         if (result.title != null) {
           _titleController.text = result.title!;

@@ -1,6 +1,7 @@
-import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/models/transaction_type.dart';
-import 'package:expense_tracker/utilities/transaction_provider.dart';
+import 'package:expense_trace/models/transaction.dart';
+import 'package:expense_trace/models/transaction_type.dart';
+import 'package:expense_trace/utilities/currency_formatter.dart';
+import 'package:expense_trace/utilities/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -247,7 +248,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    "${isIncome ? '+' : '-'} ₹${tx.amount.toStringAsFixed(0)}",
+                    "${isIncome ? '+' : '-'} ${CurrencyFormatter.format(tx.amount)}",
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: isIncome ? Colors.green : Colors.red,

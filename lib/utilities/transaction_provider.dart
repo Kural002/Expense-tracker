@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:expense_tracker/models/payment_type.dart';
-import 'package:expense_tracker/models/transaction_type.dart';
+import 'package:expense_trace/models/payment_type.dart';
+import 'package:expense_trace/models/transaction_type.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
@@ -33,7 +33,7 @@ class TransactionProvider extends ChangeNotifier {
   void _startListeningToTransactions() {
     _transactionSubscription?.cancel();
     _transactionSubscription = _firestoreService.getTransactions().listen((List<Transaction> event) {
-      _transactions = event;
+      _transactions = event..sort((a, b) => b.date.compareTo(a.date));
       notifyListeners();
     });
   }

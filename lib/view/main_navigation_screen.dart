@@ -1,9 +1,9 @@
 import 'dart:ui';
-import 'package:expense_tracker/view/add_transaction_screen.dart';
-import 'package:expense_tracker/view/expense_screen.dart';
-import 'package:expense_tracker/view/home_screen.dart';
-import 'package:expense_tracker/view/stats_screen.dart';
-import 'package:expense_tracker/view/profile_screen.dart';
+import 'package:expense_trace/view/add_transaction_screen.dart';
+import 'package:expense_trace/view/expense_screen.dart';
+import 'package:expense_trace/view/home_screen.dart';
+import 'package:expense_trace/view/stats_screen.dart';
+import 'package:expense_trace/view/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainNavigationScreen extends StatefulWidget {

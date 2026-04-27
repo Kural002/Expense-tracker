@@ -1,7 +1,8 @@
-import 'package:expense_tracker/models/categories_data.dart';
-import 'package:expense_tracker/models/transaction_type.dart';
-import 'package:expense_tracker/models/report_range.dart';
-import 'package:expense_tracker/utilities/transaction_provider.dart';
+import 'package:expense_trace/models/categories_data.dart';
+import 'package:expense_trace/models/transaction_type.dart';
+import 'package:expense_trace/models/report_range.dart';
+import 'package:expense_trace/utilities/currency_formatter.dart';
+import 'package:expense_trace/utilities/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -127,8 +128,8 @@ class _StatsScreenState extends State<StatsScreen> {
               case ReportRange.today:
                 return tx.date.year == now.year && tx.date.month == now.month && tx.date.day == now.day;
               case ReportRange.thisWeek:
-                final weekAgo = todayStart.subtract(const Duration(days: 7));
-                return tx.date.isAfter(weekAgo);
+                final startOfWeek = todayStart.subtract(Duration(days: now.weekday - 1));
+                return tx.date.isAfter(startOfWeek.subtract(const Duration(seconds: 1)));
               case ReportRange.thisMonth:
                 return tx.date.year == now.year && tx.date.month == now.month;
               case ReportRange.allTime:
@@ -240,7 +241,7 @@ class _StatsScreenState extends State<StatsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            "₹${expense.toStringAsFixed(0)}",
+            CurrencyFormatter.format(expense),
             style: theme.textTheme.displayLarge
                 ?.copyWith(color: Colors.white, fontSize: 36),
           ),
@@ -250,13 +251,13 @@ class _StatsScreenState extends State<StatsScreen> {
               _buildMiniStat(
                   context,
                   "Income",
-                  "₹${income.toStringAsFixed(0)}",
+                  CurrencyFormatter.format(income),
                   Icons.arrow_upward),
               const SizedBox(width: 20),
               _buildMiniStat(
                   context,
                   "Expenses",
-                  "₹${expense.toStringAsFixed(0)}",
+                  CurrencyFormatter.format(expense),
                   Icons.arrow_downward),
             ],
           ),
@@ -333,7 +334,7 @@ class _StatsScreenState extends State<StatsScreen> {
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                  final entry = displayData[group.x];
                  return BarTooltipItem(
-                   "₹${rod.toY.toStringAsFixed(0)}\n",
+                   "${CurrencyFormatter.format(rod.toY)}\n",
                    theme.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold, color: Colors.white),
                    children: <TextSpan>[
                      TextSpan(
@@ -443,7 +444,7 @@ class _StatsScreenState extends State<StatsScreen> {
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "₹${amount.toStringAsFixed(0)}",
+                      CurrencyFormatter.format(amount),
                       style: theme.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.primary),

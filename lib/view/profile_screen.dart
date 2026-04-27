@@ -1,9 +1,11 @@
-import 'package:expense_tracker/services/auth_service.dart';
-import 'package:expense_tracker/utilities/export_helper.dart';
-import 'package:expense_tracker/utilities/theme_provider.dart';
-import 'package:expense_tracker/utilities/transaction_provider.dart';
-import 'package:expense_tracker/widgets/safe_delete_dialog.dart';
+import 'package:expense_trace/services/auth_service.dart';
+import 'package:expense_trace/utilities/currency_formatter.dart';
+import 'package:expense_trace/utilities/export_helper.dart';
+import 'package:expense_trace/utilities/theme_provider.dart';
+import 'package:expense_trace/utilities/transaction_provider.dart';
+import 'package:expense_trace/widgets/safe_delete_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_trace/view/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -91,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildStatItem(context, "Total Balance", "₹${provider.totalBalance.toStringAsFixed(0)}", theme.colorScheme.primary),
+                  _buildStatItem(context, "Total Balance", CurrencyFormatter.format(provider.totalBalance), theme.colorScheme.primary),
                   _buildStatItem(context, "Savings Rate", "${_calculateSavingsRate(provider)}%", theme.colorScheme.secondary),
                 ],
               ),
@@ -222,6 +224,13 @@ class ProfileScreen extends StatelessWidget {
                     onPressed: () async {
                       Navigator.pop(context); // Close dialog
                       await authService.signOut();
+                      if (context.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          (route) => false,
+                        );
+                      }
                     },
                     child: const Text("Sign Out", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                   ),

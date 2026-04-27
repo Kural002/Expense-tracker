@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
-import 'package:expense_tracker/services/auth_service.dart';
-import 'package:expense_tracker/services/hive_service.dart';
+import 'package:expense_trace/services/auth_service.dart';
+import 'package:expense_trace/services/hive_service.dart';
 import '../models/transaction.dart';
 
 class FirestoreService {

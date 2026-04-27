@@ -1,7 +1,9 @@
-import 'package:expense_tracker/utilities/app_image_path.dart';
-import 'package:expense_tracker/widgets/transaction_flipper.dart';
-import 'package:expense_tracker/widgets/google_button.dart';
+import 'package:expense_trace/utilities/app_image_path.dart';
+import 'package:expense_trace/widgets/transaction_flipper.dart';
+import 'package:expense_trace/widgets/google_button.dart';
 import 'package:flutter/material.dart';
+import 'package:expense_trace/view/main_navigation_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,16 +15,28 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _authService = AuthService();
+  bool _isLoading = false;
 
   void _login() async {
+    setState(() => _isLoading = true);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    
-    final user = await _authService.signInWithGoogle();
-    
-    if (user == null) {
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Login failed. Please try again.')),
-      );
+
+    try {
+      final user = await _authService.signInWithGoogle();
+
+      if (user == null && mounted) {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Login failed. Ensure "google-services.json" is in android/app/ and SHA-1 is in Firebase.'),
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -85,7 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          color:
+                              theme.colorScheme.primary.withValues(alpha: 0.1),
                           blurRadius: 40,
                           spreadRadius: 10,
                         ),
@@ -124,8 +139,36 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     margin: const EdgeInsets.only(bottom: 20),
                     width: size.width > 600 ? 400 : double.infinity,
-                    child: GoogleButton(
-                      onPressed: _login,
+                    child: Column(
+                      children: [
+                        GoogleButton(
+                          onPressed: _login,
+                          isLoading: _isLoading,
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () {
+                            // Temporary bypass for testing
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const MainNavigationScreen()),
+                            );
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.5),
+                          ),
+                          child: Text(
+                            "Continue as Guest",
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

@@ -1,4 +1,4 @@
-import 'package:expense_tracker/models/transaction_type.dart';
+import 'package:expense_trace/models/transaction_type.dart';
 import 'package:flutter/material.dart';
 
 class Category {

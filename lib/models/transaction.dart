@@ -1,6 +1,6 @@
-import 'package:expense_tracker/models/transaction_type.dart';
+import 'package:expense_trace/models/transaction_type.dart';
 import 'package:hive/hive.dart';
-import 'package:expense_tracker/models/payment_type.dart';
+import 'package:expense_trace/models/payment_type.dart';
 import 'categories_data.dart' as custom;
 
 part 'transaction.g.dart';
@@ -60,13 +60,19 @@ class Transaction extends HiveObject {
 
   factory Transaction.fromMap(Map<String, dynamic> data) {
     return Transaction(
-      id: data['id'],
-      title: data['title'],
-      amount: (data['amount'] as num).toDouble(),
-      date: DateTime.parse(data['date']),
-      categoryLabel: data['category'].toString().toLowerCase(),
-      paymentType: data['paymentType'] == 'upi' ? PaymentType.upi : PaymentType.cash,
-      type: data['type'] == 'income' ? TransactionType.income : TransactionType.expense,
+      id: data['id'] ?? '',
+      title: data['title'] ?? 'Untitled',
+      amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
+      date: data['date'] != null ? DateTime.parse(data['date']) : DateTime.now(),
+      categoryLabel: (data['category'] ?? 'others').toString().toLowerCase(),
+      paymentType: PaymentType.values.firstWhere(
+        (e) => e.name == data['paymentType'],
+        orElse: () => PaymentType.upi,
+      ),
+      type: TransactionType.values.firstWhere(
+        (e) => e.name == data['type'],
+        orElse: () => TransactionType.expense,
+      ),
       deletedAt: data['deletedAt'] != null ? DateTime.parse(data['deletedAt']) : null,
     );
   }

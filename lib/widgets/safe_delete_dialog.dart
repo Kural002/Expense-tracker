@@ -11,7 +11,7 @@ class SafeDeleteDialog extends StatefulWidget {
 }
 
 class _SafeDeleteDialogState extends State<SafeDeleteDialog> {
-  int _secondsRemaining = 30;
+  int _secondsRemaining = 5;
   Timer? _timer;
   bool _canDelete = false;
 
@@ -106,7 +106,7 @@ class _SafeDeleteDialogState extends State<SafeDeleteDialog> {
               tween: Tween(begin: 0, end: 1),
               builder: (context, value, child) {
                 return CircularProgressIndicator(
-                  value: 1 - (_secondsRemaining / 30),
+                  value: 1 - (_secondsRemaining / 5),
                   strokeWidth: 6,
                   color: _canDelete ? theme.colorScheme.error : theme.colorScheme.primary,
                   backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.1),

@@ -1,5 +1,5 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
-import 'package:expense_tracker/models/categories_data.dart';
+import 'package:expense_trace/models/categories_data.dart';
 import 'package:flutter/material.dart';
 
 class CustomDropdownExample extends StatefulWidget {

@@ -1,7 +1,7 @@
-import 'package:expense_tracker/models/categories_data.dart';
-import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/models/transaction_type.dart';
-import 'package:expense_tracker/widgets/chart/chart_bar.dart';
+import 'package:expense_trace/models/categories_data.dart';
+import 'package:expense_trace/models/transaction.dart';
+import 'package:expense_trace/models/transaction_type.dart';
+import 'package:expense_trace/widgets/chart/chart_bar.dart';
 import 'package:flutter/material.dart';
 
 class Chart extends StatelessWidget {
